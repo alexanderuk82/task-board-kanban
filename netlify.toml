@@ -1,0 +1,10 @@
+[build]
+  publish = "/"
+
+[dev]
+  framework = "html"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

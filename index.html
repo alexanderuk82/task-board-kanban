@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Board</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+  <!-- Toast Notifications Container -->
+  <div class="toast-container" id="toast-container"></div>
+  
+  <header class="app-header">
+    <h1>Task Board</h1>
+    <div class="header-actions">
+      <div class="search-container">
+        <input type="text" id="search-input" class="search-input" placeholder="Search tasks...">
+        <button id="filter-button" class="filter-button">
+          <i class="fas fa-filter"></i>
+        </button>
+      </div>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+        <i data-lucide="sun" class="theme-icon light-icon"></i>
+        <i data-lucide="moon" class="theme-icon dark-icon"></i>
+      </button>
+      <button class="global-add-btn" id="global-add-task">
+        <i class="fas fa-plus"></i> <span class="btn-text">Create Task</span>
+      </button>
+    </div>
+  </header>
+  
+  <!-- Mobile Column Navigation -->
+  <div class="mobile-column-nav">
+    <button class="column-nav-btn" data-column="todo">To Do</button>
+    <button class="column-nav-btn" data-column="in-progress">In Progress</button>
+    <button class="column-nav-btn" data-column="testing">In Review</button>
+    <button class="column-nav-btn" data-column="done">Completed</button>
+  </div>
+  
+  <!-- Modal Overlay -->
+  <div class="modal-backdrop" id="filter-backdrop"></div>
+  
+  <!-- Filter Panel -->
+  <div class="filter-panel" id="filter-panel">
+    <div class="filter-header">
+      <h3>Filter Tasks</h3>
+      <button class="close-filter">&times;</button>
+    </div>
+    <div class="filter-body">
+      <div class="filter-group">
+        <label class="filter-label">Task Type</label>
+        <div class="filter-options">
+          <label class="filter-option">
+            <input type="checkbox" name="filter-tag" value="bug"> Bug
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" name="filter-tag" value="feature"> Feature
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" name="filter-tag" value="task"> Task
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" name="filter-tag" value="documentation"> Documentation
+          </label>
+        </div>
+      </div>
+      
+      <div class="filter-group">
+        <label class="filter-label">Priority</label>
+        <div class="filter-options">
+          <label class="filter-option">
+            <input type="checkbox" name="filter-priority" value="high"> High
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" name="filter-priority" value="medium"> Medium
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" name="filter-priority" value="low"> Low
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="filter-footer">
+      <button class="btn btn-secondary" id="reset-filters">Reset</button>
+      <button class="btn btn-primary" id="apply-filters">Apply</button>
+    </div>
+  </div>
+  
+  <div class="board">
+    <div class="column" id="todo">
+      <div class="column-header">
+        <span>To Do</span>
+        <span class="task-count">3</span>
+      </div>
+      <div class="card" draggable="true" data-id="TASK-101">
+        <div class="card-id">TASK-101</div>
+        <div class="card-title">Design new homepage</div>
+        <div class="card-description">Create mockups for the new homepage based on client feedback.</div>
+        <div class="card-tags">
+          <span class="tag feature">Design</span>
+        </div>
+        <div class="card-footer">
+          <div>
+            <span class="card-priority priority-high"></span>
+            High
+          </div>
+          <div>2 days</div>
+        </div>
+      </div>
+      
+      <div class="card" draggable="true" data-id="TASK-102">
+        <div class="card-id">TASK-102</div>
+        <div class="card-title">Fix contact form bug</div>
+        <div class="card-description">Form doesn't submit data when used in Safari.</div>
+        <div class="card-tags">
+          <span class="tag bug">Bug</span>
+        </div>
+        <div class="card-footer">
+          <div>
+            <span class="card-priority priority-medium"></span>
+            Medium
+          </div>
+          <div>1 day</div>
+        </div>
+      </div>
+      
+      <div class="card" draggable="true" data-id="TASK-103">
+        <div class="card-id">TASK-103</div>
+        <div class="card-title">Update API documentation</div>
+        <div class="card-description">Document new endpoints added in the latest version.</div>
+        <div class="card-tags">
+          <span class="tag task">Documentation</span>
+        </div>
+        <div class="card-footer">
+          <div>
+            <span class="card-priority priority-low"></span>
+            Low
+          </div>
+          <div>3 days</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="column" id="in-progress">
+      <div class="column-header">
+        <span>In Progress</span>
+        <span class="task-count">1</span>
+      </div>
+      <div class="card" draggable="true" data-id="TASK-104">
+        <div class="card-id">TASK-104</div>
+        <div class="card-title">Implement OAuth authentication</div>
+        <div class="card-description">Integrate login system with Google and Facebook.</div>
+        <div class="card-tags">
+          <span class="tag feature">Feature</span>
+          <span class="tag task">Backend</span>
+        </div>
+        <div class="card-footer">
+          <div>
+            <span class="card-priority priority-high"></span>
+            High
+          </div>
+          <div>4 days</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="column" id="testing">
+      <div class="column-header">
+        <span>In Review</span>
+        <span class="task-count">0</span>
+      </div>
+      <div class="empty-column">
+        Drag a card here for review
+      </div>
+    </div>
+    
+    <div class="column" id="done">
+      <div class="column-header">
+        <span>Completed</span>
+        <span class="task-count">0</span>
+      </div>
+      <div class="empty-column">
+        Drag a card here when completed
+      </div>
+    </div>
+  </div>
+  
+  <!-- Create Task Modal -->
+  <div class="modal-overlay" id="create-task-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Create Task</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="create-task-form">
+          <div class="form-group">
+            <label for="task-column" class="form-label">Status</label>
+            <div class="select-wrapper">
+              <select id="task-column" name="column" class="form-control">
+                <option value="todo">To Do</option>
+                <option value="in-progress">In Progress</option>
+                <option value="testing">In Review</option>
+                <option value="done">Completed</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="task-title" class="form-label">Title</label>
+            <input type="text" id="task-title" name="title" class="form-control" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="task-description" class="form-label">Description</label>
+            <textarea id="task-description" name="description" class="form-control"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Task Type</label>
+            <div class="tag-selector">
+              <label class="tag-option bug">
+                <input type="radio" name="tag" value="bug">
+                <span>Bug</span>
+              </label>
+              <label class="tag-option feature">
+                <input type="radio" name="tag" value="feature" checked>
+                <span>Feature</span>
+              </label>
+              <label class="tag-option task">
+                <input type="radio" name="tag" value="task">
+                <span>Task</span>
+              </label>
+              <label class="tag-option documentation">
+                <input type="radio" name="tag" value="documentation">
+                <span>Documentation</span>
+              </label>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="task-priority" class="form-label">Priority</label>
+            <div class="select-wrapper">
+              <select id="task-priority" name="priority" class="form-control">
+                <option value="high">High</option>
+                <option value="medium" selected>Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="task-estimate" class="form-label">Time Estimate</label>
+            <div class="select-wrapper">
+              <select id="task-estimate" name="estimate" class="form-control">
+                <option value="1 hour">1 hour</option>
+                <option value="2 hours">2 hours</option>
+                <option value="4 hours">4 hours</option>
+                <option value="1 day" selected>1 day</option>
+                <option value="2 days">2 days</option>
+                <option value="3 days">3 days</option>
+                <option value="5 days">5 days</option>
+                <option value="1 week">1 week</option>
+                <option value="2 weeks">2 weeks</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="task-due-date" class="form-label">Due Date</label>
+            <input type="date" id="task-due-date" name="dueDate" class="form-control">
+          </div>
+          
+          <div class="subtasks-container" id="subtasks-container">
+            <label class="form-label">Subtasks</label>
+            <div class="subtasks-list" id="subtasks-list"></div>
+            <button type="button" class="btn btn-secondary btn-sm" id="add-subtask">
+              <i class="fas fa-plus"></i> Add Subtask
+            </button>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancel-create">Cancel</button>
+        <button type="button" class="btn btn-primary" id="submit-create">Create Task</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Edit Task Modal -->
+  <div class="modal-overlay" id="edit-task-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Edit Task</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="edit-task-form">
+          <input type="hidden" id="edit-task-id" name="id">
+          
+          <div class="form-group">
+            <label for="edit-task-title" class="form-label">Title</label>
+            <input type="text" id="edit-task-title" name="title" class="form-control" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="edit-task-description" class="form-label">Description</label>
+            <textarea id="edit-task-description" name="description" class="form-control"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Task Type</label>
+            <div class="tag-selector">
+              <label class="tag-option bug">
+                <input type="radio" name="edit-tag" value="bug">
+                <span>Bug</span>
+              </label>
+              <label class="tag-option feature">
+                <input type="radio" name="edit-tag" value="feature">
+                <span>Feature</span>
+              </label>
+              <label class="tag-option task">
+                <input type="radio" name="edit-tag" value="task">
+                <span>Task</span>
+              </label>
+              <label class="tag-option documentation">
+                <input type="radio" name="edit-tag" value="documentation">
+                <span>Documentation</span>
+              </label>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="edit-task-priority" class="form-label">Priority</label>
+            <div class="select-wrapper">
+              <select id="edit-task-priority" name="priority" class="form-control">
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="edit-task-estimate" class="form-label">Time Estimate</label>
+            <div class="select-wrapper">
+              <select id="edit-task-estimate" name="estimate" class="form-control">
+                <option value="1 hour">1 hour</option>
+                <option value="2 hours">2 hours</option>
+                <option value="4 hours">4 hours</option>
+                <option value="1 day">1 day</option>
+                <option value="2 days">2 days</option>
+                <option value="3 days">3 days</option>
+                <option value="5 days">5 days</option>
+                <option value="1 week">1 week</option>
+                <option value="2 weeks">2 weeks</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="edit-task-due-date" class="form-label">Due Date</label>
+            <input type="date" id="edit-task-due-date" name="dueDate" class="form-control">
+          </div>
+          
+          <div class="subtasks-container" id="edit-subtasks-container">
+            <label class="form-label">Subtasks</label>
+            <div class="subtasks-list" id="edit-subtasks-list"></div>
+            <button type="button" class="btn btn-secondary btn-sm" id="edit-add-subtask">
+              <i class="fas fa-plus"></i> Add Subtask
+            </button>
+          </div>
+          
+          <div class="task-history" id="task-history">
+            <h4 class="history-title">Change History</h4>
+            <div class="history-list" id="history-list"></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancel-edit">Cancel</button>
+        <button type="button" class="btn btn-primary" id="submit-edit">Save Changes</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Export/Import Modal -->
+  <div class="modal-overlay" id="export-import-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Export/Import Tasks</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="export">Export</button>
+          <button class="tab-btn" data-tab="import">Import</button>
+        </div>
+        
+        <div class="tab-content active" id="export-tab">
+          <p class="tab-description">Export all your tasks to a JSON file for backup.</p>
+          <div class="export-actions">
+            <button class="btn btn-primary" id="export-json">Export to JSON</button>
+            <button class="btn btn-primary" id="export-csv">Export to CSV</button>
+          </div>
+        </div>
+        
+        <div class="tab-content" id="import-tab">
+          <p class="tab-description">Import tasks from a JSON file or drag and drop here.</p>
+          <div class="import-dropzone" id="import-dropzone">
+            <i class="fas fa-file-upload"></i>
+            <p>Drag a JSON file or click to select</p>
+            <input type="file" id="import-file" accept=".json" style="display: none;">
+          </div>
+          <div class="import-preview" id="import-preview"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="close-export-import">Close</button>
+        <button type="button" class="btn btn-primary" id="confirm-import">Import Data</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Task Confirmation Modal -->
+  <div class="modal-overlay" id="delete-task-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Delete Task</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="delete-warning">
+          <i class="fas fa-exclamation-triangle"></i>
+          Are you sure you want to delete this task? This action cannot be undone.
+        </p>
+        <p class="task-to-delete"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancel-delete">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirm-delete">Delete Task</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/dragdrop.js"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/taskManager.js"></script>
+  <script src="js/modals.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/responsive.js"></script>
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+  </script>
+</body>
+</html>

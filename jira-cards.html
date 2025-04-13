@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tarjetas Estilo JIRA con Drag and Drop</title>
+  <style>
+    /* Estilos generales */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f5f7;
+      color: #172b4d;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-weight: 500;
+      font-size: 24px;
+      color: #172b4d;
+    }
+    
+    /* Contenedor principal */
+    .board {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    /* Columnas */
+    .column {
+      background-color: #ebecf0;
+      border-radius: 8px;
+      width: 280px;
+      min-height: 500px;
+      padding: 12px;
+      transition: background-color 0.3s ease;
+    }
+    
+    .column.highlight {
+      background-color: #e3f2fd;
+      box-shadow: 0 0 0 2px #4c9aff;
+    }
+    
+    .column-header {
+      padding: 8px 8px 12px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #5e6c84;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .task-count {
+      background-color: #dfe1e6;
+      color: #5e6c84;
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+    
+    /* Tarjetas */
+    .card {
+      background-color: white;
+      border-radius: 3px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      padding: 12px;
+      margin-bottom: 8px;
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      position: relative;
+    }
+    
+    .card:hover {
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+      transform: translateY(-2px);
+    }
+    
+    .card.dragging {
+      cursor: grabbing;
+      opacity: 0.9;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+      transform: rotate(1deg) scale(1.02);
+      z-index: 100;
+    }
+    
+    .card-id {
+      font-size: 11px;
+      color: #5e6c84;
+      margin-bottom: 4px;
+    }
+    
+    .card-title {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    
+    .card-description {
+      font-size: 13px;
+      color: #5e6c84;
+      margin-bottom: 12px;
+    }
+    
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+    
+    .card-priority {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 4px;
+    }
+    
+    .priority-high {
+      background-color: #ff5630;
+    }
+    
+    .priority-medium {
+      background-color: #ffab00;
+    }
+    
+    .priority-low {
+      background-color: #36b37e;
+    }
+    
+    .card-tags {
+      display: flex;
+      gap: 4px;
+      margin-top: 8px;
+    }
+    
+    .tag {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      background-color: #ebecf0;
+      color: #5e6c84;
+    }
+    
+    .tag.bug {
+      background-color: #ffebe6;
+      color: #bf2600;
+    }
+    
+    .tag.feature {
+      background-color: #e3fcef;
+      color: #006644;
+    }
+    
+    .tag.task {
+      background-color: #deebff;
+      color: #0747a6;
+    }
+    
+    /* Placeholder durante el arrastre */
+    .card-placeholder {
+      background-color: #f4f5f7;
+      border: 2px dashed #dfe1e6;
+      border-radius: 3px;
+      height: 80px;
+      margin-bottom: 8px;
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 0.8; }
+      100% { opacity: 0.6; }
+    }
+    
+    /* Estilos para el estado vacío */
+    .empty-column {
+      color: #97a0af;
+      text-align: center;
+      font-size: 13px;
+      padding: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Tablero de Tareas</h1>
+  
+  <div class="board">
+    <div class="column" id="todo">
+      <div class="column-header">
+        <span>Por hacer</span>
+        <span class="task-count">3</span>
+      </div>
+      <div class="card" draggable="true" data-id="TASK-101">
+        <div class="card-id">TASK-101</div>
+        <div class="card-title">Diseñar nueva página de inicio</div>
+        <div class="card-description">Crear mockups para la nueva página de inicio basada en el feedback del cliente.</div>
+        <div class="card-tags">
+          <span class="tag feature">Diseño</span>
+        </div>
+        <div class="card-footer">
+          <div>
+            <span class="card-priority priority-high"></span>
+            Alta
+          </div>
+          <div>2 días</div>
+        </div>
+      </div>
+      
+      <div class="card" draggable="true" data-id="TASK-102">
+        <div class="card-id">TASK-102</div>
+        <div class="card-title">Corregir error en formulario de contacto</div>
+        <div class="card-description">El formulario no envía datos cuando se usa en Safari.</div>
+        <div class="card-tags">
+          <span class="tag bug">Bug</span>
+        </div>
+        <div class="card-footer">
+          <div>
+            <span class="card-priority priority-medium"></span>
+            Media
+          </div>
+          <div>1 día</div>
+        </div>
+      </div>
+      
+      <div class="card" draggable="true" data-id="TASK-103">
+        <div class="card-id">TASK-103</div>
+        <div class="card-title">Actualizar documentación API</div>
+        <div class="card-description">Documentar los nuevos endpoints añadidos en la última versión.</div>
+        <div class="card-tags">
+          <span class="tag task">Documentación</span>
+        </div>
+        <div class="card-footer">
+          <div>
+            <span class="card-priority priority-low"></span>
+            Baja
+          </div>
+          <div>3 días</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="column" id="in-progress">
+      <div class="column-header">
+        <span>En progreso</span>
+        <span class="task-count">1</span>
+      </div>
+      <div class="card" draggable="true" data-id="TASK-104">
+        <div class="card-id">TASK-104</div>
+        <div class="card-title">Implementar autenticación OAuth</div>
+        <div class="card-description">Integrar sistema de login con Google y Facebook.</div>
+        <div class="card-tags">
+          <span class="tag feature">Feature</span>
+          <span class="tag task">Backend</span>
+        </div>
+        <div class="card-footer">
+          <div>
+            <span class="card-priority priority-high"></span>
+            Alta
+          </div>
+          <div>4 días</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="column" id="testing">
+      <div class="column-header">
+        <span>En revisión</span>
+        <span class="task-count">0</span>
+      </div>
+      <div class="empty-column">
+        Arrastra una tarjeta aquí para revisión
+      </div>
+    </div>
+    
+    <div class="column" id="done">
+      <div class="column-header">
+        <span>Completado</span>
+        <span class="task-count">0</span>
+      </div>
+      <div class="empty-column">
+        Arrastra una tarjeta aquí cuando esté completada
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Seleccionar elementos
+      const cards = document.querySelectorAll('.card');
+      const columns = document.querySelectorAll('.column');
+      
+      // Variables para el arrastre
+      let draggedCard = null;
+      let placeholder = null;
+      let initialColumn = null;
+      
+      // Funciones de arrastre
+      function handleDragStart(e) {
+        // Guardar referencia a la tarjeta arrastrada
+        draggedCard = this;
+        initialColumn = this.parentNode;
+        
+        // Crear placeholder
+        placeholder = document.createElement('div');
+        placeholder.className = 'card-placeholder';
+        
+        // Aplicar estilos de arrastre
+        setTimeout(() => {
+          this.classList.add('dragging');
+          
+          // Insertar placeholder donde estaba la tarjeta
+          initialColumn.insertBefore(placeholder, draggedCard);
+          
+          // Ocultar la tarjeta original del flujo normal
+          this.style.position = 'absolute';
+          this.style.zIndex = '1000';
+          this.style.width = `${this.offsetWidth}px`;
+          
+          // Mover la tarjeta con el cursor
+          moveAt(e.pageX, e.pageY);
+        }, 0);
+        
+        // Prevenir comportamiento predeterminado
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', ''); // Necesario para Firefox
+      }
+      
+      function moveAt(pageX, pageY) {
+        if (!draggedCard) return;
+        
+        // Calcular posición
+        const cardRect = draggedCard.getBoundingClientRect();
+        const offsetX = cardRect.width / 2;
+        const offsetY = 20; // Offset desde el cursor
+        
+        draggedCard.style.left = `${pageX - offsetX}px`;
+        draggedCard.style.top = `${pageY - offsetY}px`;
+      }
+      
+      function handleDragOver(e) {
+        // Prevenir comportamiento predeterminado
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        
+        // Resaltar columna
+        this.classList.add('highlight');
+        
+        // Mover la tarjeta con el cursor
+        moveAt(e.pageX, e.pageY);
+        
+        // Determinar posición para el placeholder
+        if (this.contains(placeholder)) {
+          const cards = Array.from(this.querySelectorAll('.card:not(.dragging)'));
+          
+          // Encontrar la tarjeta más cercana al cursor
+          let closestCard = null;
+          let closestDistance = Infinity;
+          
+          cards.forEach(card => {
+            const rect = card.getBoundingClientRect();
+            const cardMiddle = rect.top + rect.height / 2;
+            const distance = Math.abs(e.clientY - cardMiddle);
+            
+            if (distance < closestDistance) {
+              closestDistance = distance;
+              closestCard = card;
+            }
+          });
+          
+          // Mover el placeholder
+          if (closestCard) {
+            const rect = closestCard.getBoundingClientRect();
+            const isAfter = e.clientY > rect.top + rect.height / 2;
+            
+            if (isAfter) {
+              this.insertBefore(placeholder, closestCard.nextSibling);
+            } else {
+              this.insertBefore(placeholder, closestCard);
+            }
+          }
+        } else {
+          // Si el placeholder no está en esta columna, añadirlo
+          if (this.querySelector('.empty-column')) {
+            this.removeChild(this.querySelector('.empty-column'));
+          }
+          this.appendChild(placeholder);
+        }
+      }
+      
+      function handleDragLeave(e) {
+        // Quitar resaltado
+        this.classList.remove('highlight');
+        
+        // Si la columna queda vacía, mostrar mensaje
+        if (this !== initialColumn && 
+            !this.querySelector('.card:not(.dragging)') && 
+            !this.querySelector('.empty-column')) {
+          const emptyMessage = document.createElement('div');
+          emptyMessage.className = 'empty-column';
+          emptyMessage.textContent = 'Arrastra una tarjeta aquí';
+          this.appendChild(emptyMessage);
+        }
+      }
+      
+      function handleDrop(e) {
+        e.preventDefault();
+        
+        // Quitar resaltado
+        this.classList.remove('highlight');
+        
+        // Restaurar estilos de la tarjeta
+        draggedCard.classList.remove('dragging');
+        draggedCard.style.position = '';
+        draggedCard.style.left = '';
+        draggedCard.style.top = '';
+        draggedCard.style.width = '';
+        draggedCard.style.zIndex = '';
+        
+        // Insertar la tarjeta donde está el placeholder
+        if (placeholder && placeholder.parentNode) {
+          placeholder.parentNode.insertBefore(draggedCard, placeholder);
+          placeholder.parentNode.removeChild(placeholder);
+        } else {
+          // Si no hay placeholder, añadir al final
+          this.appendChild(draggedCard);
+        }
+        
+        // Actualizar contadores
+        updateTaskCounts();
+        
+        // Limpiar referencias
+        draggedCard = null;
+        placeholder = null;
+        initialColumn = null;
+      }
+      
+      function handleDragEnd(e) {
+        // Limpiar si se cancela el arrastre
+        if (draggedCard) {
+          draggedCard.classList.remove('dragging');
+          draggedCard.style.position = '';
+          draggedCard.style.left = '';
+          draggedCard.style.top = '';
+          draggedCard.style.width = '';
+          draggedCard.style.zIndex = '';
+        }
+        
+        // Eliminar placeholder
+        if (placeholder && placeholder.parentNode) {
+          placeholder.parentNode.removeChild(placeholder);
+        }
+        
+        // Quitar resaltado de todas las columnas
+        columns.forEach(column => {
+          column.classList.remove('highlight');
+        });
+        
+        // Actualizar contadores
+        updateTaskCounts();
+        
+        // Limpiar referencias
+        draggedCard = null;
+        placeholder = null;
+        initialColumn = null;
+      }
+      
+      // Función para actualizar contadores
+      function updateTaskCounts() {
+        columns.forEach(column => {
+          const cardCount = column.querySelectorAll('.card').length;
+          column.querySelector('.task-count').textContent = cardCount;
+          
+          // Mostrar/ocultar mensaje de columna vacía
+          const emptyMessage = column.querySelector('.empty-column');
+          if (cardCount === 0 && !emptyMessage) {
+            const newEmptyMessage = document.createElement('div');
+            newEmptyMessage.className = 'empty-column';
+            newEmptyMessage.textContent = 'Arrastra una tarjeta aquí';
+            column.appendChild(newEmptyMessage);
+          } else if (cardCount > 0 && emptyMessage) {
+            column.removeChild(emptyMessage);
+          }
+        });
+      }
+      
+      // Asignar eventos a las tarjetas
+      cards.forEach(card => {
+        card.addEventListener('dragstart', handleDragStart);
+        card.addEventListener('dragend', handleDragEnd);
+      });
+      
+      // Asignar eventos a las columnas
+      columns.forEach(column => {
+        column.addEventListener('dragover', handleDragOver);
+        column.addEventListener('dragleave', handleDragLeave);
+        column.addEventListener('drop', handleDrop);
+      });
+      
+      // Inicializar contadores
+      updateTaskCounts();
+    });
+  </script>
+</body>
+</html>
