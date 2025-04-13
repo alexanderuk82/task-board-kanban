@@ -36,3 +36,7 @@ Thumbs.db
 *.log
 *.tmp
 *.temp
+
+# Archivos específicos del despliegue
+netlify.toml
+windsurf_deployment.yaml
