@@ -1,6 +1,6 @@
 # Task Board - Interactive Kanban Board
 
-![Task Board Screenshot](https://via.placeholder.com/800x400?text=Task+Board+Screenshot)
+![Task Board Screenshot](cover.png)
 
 ## Overview
 
@@ -34,7 +34,7 @@ Task Board is a feature-rich, interactive Kanban board application designed to h
 ### Installation
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/task-board.git
+   git clone https://github.com/alexanderuk82/task-board-kanban.git
    ```
 2. Open `index.html` in your browser
 
